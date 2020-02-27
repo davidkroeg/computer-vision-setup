@@ -1,6 +1,6 @@
 # IM520/MC5050 Computer Vision Project Setup
 
-Fork this repository (or download as ZIP) to get started.
+Fork-clone this repository or download as ZIP to get started.
 
 
 
