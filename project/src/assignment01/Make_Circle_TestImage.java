@@ -16,7 +16,7 @@ import java.util.Random;
  * The display is inverted, i.e., background pixels are shown white.
  * 
  * @author W. Burger
- * @version 2018-08-27
+ * @version 2020/02/28
  */
 public class Make_Circle_TestImage implements PlugIn {
 	
@@ -35,7 +35,7 @@ public class Make_Circle_TestImage implements PlugIn {
 	
 	private static boolean showInverted = false;	// show inverted
 
-	
+	// --------------------------------------------------------------
 	
 	public void run(String arg0) {
 		if (!getUserInput()) {
@@ -74,19 +74,21 @@ public class Make_Circle_TestImage implements PlugIn {
 	
 	private boolean getUserInput() {
 		GenericDialog gd = new GenericDialog("Create Circle Test Image");
+		gd.addStringField("Title", imageTitle);
 		gd.addNumericField("Image width", W, 0);
 		gd.addNumericField("Image height", H, 0);
 		gd.addNumericField("Center xc", xc, 2);
 		gd.addNumericField("Center yc", yc, 2);
 		gd.addNumericField("Radius r", rad, 2);
-		gd.addNumericField("Position Noise sigma", xySigma, 2);
-		gd.addNumericField("No. of ON-Circle Points", onCirclePts, 0);
-		gd.addNumericField("No. of OFF-Circle Points", offCirclePts, 0);
+		gd.addNumericField("Position noise \u03C3", xySigma, 2);
+		gd.addNumericField("No. of ON-circle points", onCirclePts, 0);
+		gd.addNumericField("No. of OFF-circle points", offCirclePts, 0);
 		gd.addCheckbox("Show inverted image", showInverted);
 		gd.showDialog();
 		if (gd.wasCanceled()) {
 			return false;
 		}
+		imageTitle = gd.getNextString();
 		W = (int) gd.getNextNumber();
 		H = (int) gd.getNextNumber();
 		xc = gd.getNextNumber();
