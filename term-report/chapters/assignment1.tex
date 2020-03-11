@@ -6,3 +6,25 @@ Briefly state the task of this assignment in your own words (\ie, without reiter
 contents of the assignment sheet). Reference all literature, websites and other resources used,
 \eg, \cite{Higham1998,Guttman2001} or \cite{Mermin1989}. 
 The references are collected in a single section at the end of this document.
+
+{\it Rewrite later}
+
+Detect a circle out of dots in a binary image. 
+
+Collect the coordinates of all black pixels
+
+Randomly choose 3 points and use RANSAC Algorithm to detect points
+
+Calculate parameters of the circle (center point(x,y), radius) out of the 3 points
+%% Sources: 
+%% https://math.stackexchange.com/questions/213658/get-the-equation-of-a-circle-when-given-3-points
+%%https://math.stackexchange.com/questions/2836274/3-point-to-circle-and-get-radius?noredirect=1&lq=1
+%% https://www.arndt-bruenner.de/mathe/scripts/kreis3p.htm
+%% http://paulbourke.net/geometry/circlesphere/
+Geradengleichung aufstellen zwischen AB und BC - MIttelpunkt beider Geraden ermitteln - Normal Gerade durch den jeweiligen Mittalpunkt aufstellen und miteinander kreuzen -> Mittelpunkt 
+
+Count the points that are sufficiently close to the circle (certain distance parameter)
+
+Repeat the steps above and save the points of the best fitting circle (circle with highest point count)
+
+draw the circle onto the input image and output its parameters
