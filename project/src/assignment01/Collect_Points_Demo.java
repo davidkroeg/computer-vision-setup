@@ -66,7 +66,6 @@ public class Collect_Points_Demo implements PlugInFilter {
 			// check if it has more points on circle
 			if (circle.pointCount > detectedCircle.pointCount) {
 				detectedCircle = circle;
-				IJ.log("Points on Circle: " + Integer.toString(detectedCircle.pointCount));
 			}
 		}
 		
@@ -75,6 +74,8 @@ public class Collect_Points_Demo implements PlugInFilter {
 		cp.setLineWidth(1);
 		int radius = (int)detectedCircle.getRadius();
 		cp.drawOval(detectedCircle.getCenter().x - radius, detectedCircle.getCenter().y - radius, radius * 2, radius * 2);
+		IJ.log("Points on Circle: " + Integer.toString(detectedCircle.pointCount));
+		IJ.log("Circle Center: " + Integer.toString(detectedCircle.getCenter().x) + "/" +  Integer.toString(detectedCircle.getCenter().y));
 		
 		// draw dots on circle
 		cp.setColor(Color.red);
