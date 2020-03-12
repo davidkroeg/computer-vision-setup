@@ -2,29 +2,38 @@
 \chapter{Circle detection in binary dot images}
 %%%----------------------------------------------------------
 
-Briefly state the task of this assignment in your own words (\ie, without reiterating the
-contents of the assignment sheet). Reference all literature, websites and other resources used,
-\eg, \cite{Higham1998,Guttman2001} or \cite{Mermin1989}. 
-The references are collected in a single section at the end of this document.
+%Briefly state the task of this assignment in your own words (\ie, without reiterating the
+%contents of the assignment sheet). Reference all literature, websites and other resources used,
+%\eg, \cite{Higham1998,Guttman2001} or \cite{Mermin1989}. 
+%The references are collected in a single section at the end of this document.
 
+Detect a circle out that is embedded in a noisy binary image.
+
+\section{Algorithm}
 {\it Rewrite later}
 
-Detect a circle out of dots in a binary image. 
-
-Collect the coordinates of all black pixels
-
-Randomly choose 3 points and use RANSAC Algorithm to detect points
-
-Calculate parameters of the circle (center point(x,y), radius) out of the 3 points
+\begin{itemize}
+	\item Collect the coordinates of all black pixels
+	\item Randomly choose 3 points and use RANSAC Algorithm to detect points
+	\item Calculate parameters of the circle (center point(x,y), radius) out of the 3 points
 %% Sources: 
 %% https://math.stackexchange.com/questions/213658/get-the-equation-of-a-circle-when-given-3-points
 %%https://math.stackexchange.com/questions/2836274/3-point-to-circle-and-get-radius?noredirect=1&lq=1
 %% https://www.arndt-bruenner.de/mathe/scripts/kreis3p.htm
 %% http://paulbourke.net/geometry/circlesphere/
-Geradengleichung aufstellen zwischen AB und BC - MIttelpunkt beider Geraden ermitteln - Normal Gerade durch den jeweiligen Mittalpunkt aufstellen und miteinander kreuzen -> Mittelpunkt 
+	\item Count the points that are sufficiently close to the circle (certain distance parameter)
+	\item Repeat the steps above and save the points of the best fitting circle (circle with highest point count)
+	\item draw the circle onto the input image and output its parameters
+\end{itemize}
 
-Count the points that are sufficiently close to the circle (certain distance parameter)
+%Geradengleichung aufstellen zwischen AB und BC - Mittelpunkt beider Geraden ermitteln - Normal Gerade durch den jeweiligen Mittelpunkt aufstellen und miteinander kreuzen -> Mittelpunkt 
 
-Repeat the steps above and save the points of the best fitting circle (circle with highest point count)
+\section{Research Question A}
+The probability of selecting 3 circle points in a random draw is $(m/n)^3$ {\it (Formular needs to formated)}.
 
-draw the circle onto the input image and output its parameters
+There are at least 7 random draws needed to detect 3 circle points.
+{\it (Formular/way to solution needs to added here)}.
+
+\section{Research Question B}
+
+To detect multiple circles in one image we need to define a threshold for the number of points which are needed to be on a circle to be detected as a valid circle. If detected the circle is added to a list. To make sure that the same circle is not detected multiple times we need to check before adding it to the list that there is no circle with the same center point and radius already detected.
