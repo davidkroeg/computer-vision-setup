@@ -10,12 +10,13 @@
 Detect a circle out that is embedded in a noisy binary image.
 
 \section{Algorithm}
-{\it Rewrite later}
+%TODO: Rewrite Algorithm Section
 
 \begin{itemize}
 	\item Collect the coordinates of all black pixels
 	\item Randomly choose 3 points and use RANSAC Algorithm to detect points
 	\item Calculate parameters of the circle (center point(x,y), radius) out of the 3 points
+%TODO: Add Sources
 %% Sources: 
 %% https://math.stackexchange.com/questions/213658/get-the-equation-of-a-circle-when-given-3-points
 %%https://math.stackexchange.com/questions/2836274/3-point-to-circle-and-get-radius?noredirect=1&lq=1
@@ -26,13 +27,39 @@ Detect a circle out that is embedded in a noisy binary image.
 	\item draw the circle onto the input image and output its parameters
 \end{itemize}
 
+\begin{figure}[htb]
+	\centering
+	\begin{minipage}[t]{0.49\linewidth}
+		\centering
+			\includegraphics[width=.90\linewidth]{images/circle-test}
+		\caption{Generated picture}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.49\linewidth}
+		\centering
+		\includegraphics[width=.90\linewidth]{images/circle_result}
+		\caption{Result picture}
+	\end{minipage}
+\end{figure}
+
+
 %Geradengleichung aufstellen zwischen AB und BC - Mittelpunkt beider Geraden ermitteln - Normal Gerade durch den jeweiligen Mittelpunkt aufstellen und miteinander kreuzen -> Mittelpunkt 
 
 \section{Research Question A}
-The probability of selecting 3 circle points in a random draw is $(m/n)^3$ {\it (Formular needs to formated)}.
+\begin{itemize}
+	\item The probability of selecting 3 circle points in a random draw if we make sure that we don't draw the same point twice is:
+	\begin{displaymath}
+	P = \frac{m}{n} \cdot \frac{m-1}{n-1} \cdot \frac{m-2}{n-2}
+	\end{displaymath}
+	\item There are at least 7 random draws needed to detect 3 circle points.
+	\begin{eqnarray*}
+	W = 1-(1-p)^n
+	
+	\end{eqnarray*}
+\end{itemize}
 
-There are at least 7 random draws needed to detect 3 circle points.
-{\it (Formular/way to solution needs to added here)}.
+%TODO: add to soruces
+%https://www.mathe-online.at/materialien/Daniela.Eder/files/Diskrete_WK/Zusammenstellung.html
 
 \section{Research Question B}
 
