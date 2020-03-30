@@ -5,11 +5,9 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-//import org.apache.commons.math3.linear.DecompositionSolver;
-//import org.apache.commons.math3.linear.MatrixUtils;
-//import org.apache.commons.math3.linear.RealMatrix;
-//import org.apache.commons.math3.linear.RealVector;
-//import org.apache.commons.math3.linear.SingularValueDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -40,13 +38,7 @@ public class Test_Affine_Transformation implements PlugInFilter {
 		List<Point> pointList = getPoints(ipTestImage, w, h);
 		List<Point> realPoints = getPoints(ipResultImage, w, h);
 		
-		IJ.log("Found " + pointList.size() + " foreground points in Test Image.");
-		
-//		RealMatrix A = MatrixUtils.createRealMatrix(new double[][] 
-//				{{ 0.013,  1.088, 18.688}, 
-//				 {-1.000,  -0.05,  127.5}, 
-//				 { 0, 0, 1}});
-		
+		IJ.log("Found " + pointList.size() + " foreground points in Test Image.");		
 		
 		//iterate through point List, apply transformation and add it to the new result point list
 		List<Point> resultPoints = new ArrayList<Point>();
@@ -63,7 +55,6 @@ public class Test_Affine_Transformation implements PlugInFilter {
 		showImage(cp, "colored dots");
 		
 		//calculate residual error (caused by rounding to pixel positions)
-		//FIXME: Error is still wrong
 		double residualError = calculateError(resultPoints, realPoints);
 		IJ.log("Residual Error: " + residualError);
 	}
@@ -81,40 +72,18 @@ public class Test_Affine_Transformation implements PlugInFilter {
 		return pntlist;
 	}
 	
-	//probably relevant for next exercise
-//	private Point matrixMultiplication(RealMatrix A, RealVector b) {
-//		DecompositionSolver s = new SingularValueDecomposition(A).getSolver();
-//		IJ.log("Start: b = " + b.toString());
-//		// Solve the system of equations:
-//		RealVector x = s.solve(b);
-//		
-//		IJ.log("Solution: x = " + x.toString()); // = {-0.3698630137; 0.1780821918; -0.602739726}
-//		
-//		// Verify that A.x = b:
-//		RealVector bb = A.operate(x);
-//		IJ.log("Check: A.x = " + bb.toString());
-//		
-//		Point resultPoint = new Point();
-//		resultPoint.setLocation(x.getEntry(0), x.getEntry(1));
-//		
-//		return resultPoint;
-//	}
-	
-	private double calculateError(Point p, Point x) {
-		//only fits if Point p is the not transformed point
-//		double error = Math.pow((0.013*p.getX() + 1.088*p.getY() + 18.688 - x.getX()), 2) +
-//				Math.pow((-1*p.getX() - 0.05*p.getY() + 127.5 - x.getY()), 2);
-		double error = Math.abs(p.getX() - x.getX()) + Math.abs(p.getY() - x.getY());
+	private Point multiplyPointWithMatrix(Point p) {		
+		RealMatrix M = MatrixUtils.createRealMatrix(new double[][] 
+				{{ 0.013,  1.088, 18.688}, 
+				 {-1,  -0.05,  127.5}, 
+				 { 0, 0, 1}});
 		
-		return error;
-	}
-	
-	private Point multiplyPointWithMatrix(Point p) {
-		double x = p.getX() * 0.013 + p.getY() * 1.088 + 18.688;
-		double y = p.getX() * -1 - p.getY() * 0.05 + 127.5;
+		RealVector a = MatrixUtils.createRealVector(new double[]{p.getX(), p.getY(), 1});
+		
+		RealVector b = M.operate(a);
 		
 		Point resultPoint = new Point();
-		resultPoint.setLocation(x, y);
+		resultPoint.setLocation(b.getEntry(0), b.getEntry(1));
 		
 		return resultPoint;
 	}
@@ -125,13 +94,7 @@ public class Test_Affine_Transformation implements PlugInFilter {
 	 * @param realPoints the real points of the right image
 	 * @return least squares error as a double
 	 */
-	private double calculateError(List<Point> resultPoints, List<Point> realPoints) {
-		//TODO: run through result Points and find the point in the right set which is closest -> calculate Error and add to sum
-		//for loop result points
-			//for loop real points
-			//calc distance - save points with closest distance
-		//calc error to closest point and add to error sum
-		
+	private double calculateError(List<Point> resultPoints, List<Point> realPoints) {		
 		double error = 0.0;
 		
 		for (Point resultPoint : resultPoints) {
@@ -144,6 +107,15 @@ public class Test_Affine_Transformation implements PlugInFilter {
 			}
 			error += calculateError(resultPoint, correspondancePoint);
 		}
+		return error;
+	}
+	
+	private double calculateError(Point p, Point x) {
+		//take this if p is not the transformed point
+//		double error = Math.pow(Math.pow((0.013*p.getX() + 1.088*p.getY() + 18.688 - x.getX()), 2) +
+//				Math.pow((-1*p.getX() - 0.05*p.getY() + 127.5 - x.getY()), 2), 0.5);
+		double error = Math.pow(Math.pow(p.getX() - x.getX(), 2) +
+				Math.pow(p.getY() - x.getY(), 2), 0.5);
 		return error;
 	}
 	
