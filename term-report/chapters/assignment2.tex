@@ -6,8 +6,11 @@
 \section{Matching point sets by brute force or RANSAC}
 
 To many possibilities
-Q1: Calculation for all the points with equations
 
+\subsection{Research Question 1}
+Insert calculation for all the points with equations
+
+\subsection{Research Question 2}
 Q2: To many possibilities/would take to long chance really small to choose the same 3 points inn the correct order
 
 \section{Implement/test the affine transformation}
@@ -15,3 +18,16 @@ Q2: To many possibilities/would take to long chance really small to choose the s
 Apply the transformation to each point in the left set, find the point in the right set that is the closest and accumulate the sum of the squared error distance. Also show the projected points to validate the transformation.
 
 \section{Structuring point sets by triangulation}
+
+\begin{itemize}
+	\item calculate Delaunay triangulation
+	\item Select a pair (Selection RANSAC?) of triangles from $X$ and $X'$ respectively and find the affine transformation between them
+	\item Apply A to all points in $X$ and measure the distance of each projected point to its closest point in $X'$
+	\item create a sorted List of the points in $X'$ to match their correspondance points in $X$
+	\item memorize constellation with smallest error
+	\item repeat from step 2 until "done"
+	\item Now find the best least-squares fit between both point clouds
+\end{itemize}
+
+\subsection{Research Question}
+check notes on iPad in exercise 
