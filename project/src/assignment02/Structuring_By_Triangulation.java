@@ -16,6 +16,7 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.GenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
@@ -34,8 +35,14 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 	private static Color PointColor = Color.magenta;
 	private static float StrokeWidth = 0.1f;
 	private static double PointRadius = 1.5;
+
+	private static int repeatCount = 50;
 	
-	private List<Point> currentPoints = new ArrayList<>();
+	private List<Point> projectedPoints = new ArrayList<>();
+	private List<Point> currentCorrespondance = new ArrayList<>();
+	private List<Point> finalCorrespondance = new ArrayList<>();
+	private RealMatrix finalTransformation = null;
+	private double finalError = Double.MAX_VALUE;
 	
 	ImagePlus im = null;
 	
@@ -46,10 +53,14 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 	}
 
 	@Override
-	public void run(ImageProcessor ip) {
+	public void run(ImageProcessor ip) {		
 		int n = im.getStackSize();
 		if (n < 2) {
 			IJ.error("stack with 2 images required");
+			return;
+		}
+		
+		if (!getUserInput()) {
 			return;
 		}
 		
@@ -63,37 +74,49 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		DelaunayTriangulation startTriangulation = new TriangulationGuibas(startPoints);
 		DelaunayTriangulation endTriangulation = new TriangulationGuibas(endPoints);
 		
-		Collection<Triangle> startTriangles = startTriangulation.getTriangles();
-		Collection<Triangle> endTriangles = endTriangulation.getTriangles();
+		List<Triangle> startTriangles = startTriangulation.getTriangles();
+		List<Triangle> endTriangles = endTriangulation.getTriangles();
 		
-		//test on one triangle
-		//TODO: loop through all triangles and repeat
-		Triangle startTriangle = startTriangles.iterator().next();
-		Triangle  endTriangle = endTriangles.iterator().next();
-		RealMatrix A = null;
-		Point[] tempPoints1 = startTriangle.getPoints();
+		//TODO: find another way to run through triangles
+		//Choose 2 random triangles and find their transformation. Repeat a certain times
+		for (int k = 0; k < repeatCount; k++) {
+			Triangle startTriangle = chooseRandomTriangle(startTriangles);
+			Triangle  endTriangle = chooseRandomTriangle(endTriangles);
+			RealMatrix A = null;
+			
+			//test on one triangle
+			Point[] tempPoints1 = startTriangle.getPoints();
+			Point[] tempPoints2 = endTriangle.getPoints();
+			
+			for(int i = 0; i <3; i++) {
+				A = findAffineTransformation(tempPoints1, tempPoints2);
+				reorderArray(tempPoints2);
+				
+				//Apply a to all points 
+				projectedPoints = applyAffineTransformation(startPoints, A);
+				
+				//Measure the distance of each projected point to its closest point
+				double residualError = calculateError(projectedPoints, endPoints);
+				
+				//If error is smallest then save currentPoints to correspondancePoints
+				if (Double.compare(finalError, residualError) > 0) {
+					finalError = residualError;
+					finalCorrespondance = currentCorrespondance;
+					finalTransformation = A;
+				}			
+			}
+		}
 		
-//		for(int i = 0; i <3; i++) {
-//			
-//		}
-		
-		Point[] tempPoints2 = endTriangle.getPoints();
-		//do point permutation
-		
-		A = findAffineTransformation(tempPoints1, tempPoints2);
-		
-		//TODO: Apply a to all points 
-		List<Point> projectedPoints = applyAffineTransformation(startPoints, A);
-		
-		//TODO: measure the distance of each projected point to its closest point
-		double residualError = calculateError(projectedPoints, endPoints);
-		IJ.log("Residual Error: " + residualError);
-		//if error is smallest then save currentPoints to correspondancePoints
-		
-		//TODO: memorize the best constellation
-		
+		IJ.log("Final Error: " + finalError);
 		//TODO: find the least squares fit for the resulting point match
-		//find transformation between realPoints and correspondancePoints 
+		//FIXME: finalCorrespondance is wrong
+		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
+		IJ.log("Projected points: list = " + projectedPoints.toString());
+		//find transformation between realPoints and correspondancePoints
+		finalTransformation = findAffineTransformation(startPoints.toArray(new Point[0]), finalCorrespondance.toArray(new Point[0]));
+		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
+		IJ.log("Correspondance: list = " + finalCorrespondance.toString());
+		IJ.log("Correspondance: array = " + finalCorrespondance.toArray(new Point[0])[12].toString());
 		
 //		showOverlay(ipStartImage, startTriangulation);
 //		showOverlay(ipEndImage, endTriangulation);
@@ -107,36 +130,33 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		showImage(cp, "colored dots");
 	}
 	
-	private RealMatrix findAffineTransformation(Triangle startTriangle, Triangle endTriangle) {
-		Point[] startPoints = startTriangle.getPoints();
-		Point[] endPoints = endTriangle.getPoints();
-		//TODO: point permutation
-		//remove first point from list and append it 3 times
-		
-		RealMatrix M = createMatrix(startPoints);
-		RealVector b = createVector(endPoints);
-		
-		//solve for A
-		RealVector a = solveEquations(M, b);
-		
-		RealMatrix A = MatrixUtils.createRealMatrix(new double[][]
-				{{a.getEntry(0), a.getEntry(1), a.getEntry(2)},
-				 {a.getEntry(3), a.getEntry(4), a.getEntry(5)}
-				});
-		
-		return A;
+	private boolean getUserInput() {
+		GenericDialog gd = new GenericDialog("Create Circle Test Image");
+		gd.addNumericField("Repeat Count", repeatCount, 0);
+		gd.showDialog();
+		if (gd.wasCanceled()) {
+			return false;
+		}
+		repeatCount = (int) gd.getNextNumber();
+		return true;
 	}
 	
 	private RealMatrix findAffineTransformation(Point[] startPoints, Point[] endPoints) {
 		RealMatrix M = createMatrix(startPoints);
 		RealVector b = createVector(endPoints);
-		
+		IJ.log("Start: b = " + b.toString());
 		//solve for A
 		RealVector a = solveEquations(M, b);
+		IJ.log("Solution: a = " + a.toString());
+		
+		// Verify that A.x = b:
+		RealVector bb = M.operate(a);
+		IJ.log("Check: A.x = " + bb.toString());
 		
 		RealMatrix A = MatrixUtils.createRealMatrix(new double[][]
 				{{a.getEntry(0), a.getEntry(1), a.getEntry(2)},
-				 {a.getEntry(3), a.getEntry(4), a.getEntry(5)}
+				 {a.getEntry(3), a.getEntry(4), a.getEntry(5)},
+				 {0, 0, 1}
 				});
 		
 		return A;
@@ -166,7 +186,7 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 	 */
 	private double calculateError(List<Point> resultPoints, List<Point> realPoints) {		
 		double error = 0.0;
-		currentPoints.clear();
+		currentCorrespondance.clear();
 		
 		for (Point resultPoint : resultPoints) {
 			Point correspondancePoint = Point.create(0, 0);
@@ -177,9 +197,10 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 				}
 			}
 			error += calculateError(resultPoint, correspondancePoint);
-			currentPoints.add(correspondancePoint);
+			IJ.log("Correspondance: " + resultPoint + " -> " + correspondancePoint);
+			currentCorrespondance.add(correspondancePoint);
 		}
-		IJ.log("Correspondance Points count: " + currentPoints.size());
+		IJ.log("------------------------------------------");
 		return error;
 	}
 	
@@ -193,21 +214,22 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 	}
 	
 	private RealMatrix createMatrix(Point[] points) {
-		RealMatrix M = MatrixUtils.createRealMatrix(new double[][] 
-				{{ points[0].getX(),  points[0].getY(), 1, 0, 0, 0}, 
-				 { 0, 0, 0, points[0].getX(),  points[0].getY(), 1}, 
-				 { points[1].getX(),  points[1].getY(), 1, 0, 0, 0}, 
-				 { 0, 0, 0, points[1].getX(),  points[1].getY(), 1},
-				 { points[2].getX(),  points[2].getY(), 1, 0, 0, 0}, 
-				 { 0, 0, 0, points[2].getX(),  points[2].getY(), 1},
-				 });
-		
+		double[][] matrix = new double[2*points.length][6];
+		for  (int i = 0; i < points.length; i++) {
+			matrix [i * 2] = new double[]{ points[i].getX(),  points[i].getY(), 1, 0, 0, 0 };
+			matrix [(i*2)+1] = new double[]{ 0, 0, 0, points[i].getX(),  points[i].getY(), 1 };
+		}
+		RealMatrix M = MatrixUtils.createRealMatrix(matrix);
 		return M;
 	}
 	
 	private RealVector createVector(Point[] points) {
-		RealVector v = MatrixUtils.createRealVector(new double[]
-				{points[0].getX(), points[0].getY(),points[1].getX(), points[1].getY(),points[2].getX(), points[2].getY()});
+		double[] vector = new double[2*points.length];
+		for  (int i = 0; i < points.length; i++) {
+			vector[i * 2] = points[i].getX();
+			vector[(i*2)+1] = points[i].getY();
+		}
+		RealVector v = MatrixUtils.createRealVector(vector);
 		return v;
 	}
 	
@@ -273,16 +295,37 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 	//probably relevant for next exercise
 	private RealVector solveEquations(RealMatrix A, RealVector b) {
 		DecompositionSolver s = new SingularValueDecomposition(A).getSolver();
-		IJ.log("Start: b = " + b.toString());
+//		IJ.log("Start: b = " + b.toString());
 		// Solve the system of equations:
 		RealVector x = s.solve(b);
 		
-		IJ.log("Solution: x = " + x.toString());
+//		IJ.log("Solution: x = " + x.toString());
 		
 		// Verify that A.x = b:
-		RealVector bb = A.operate(x);
-		IJ.log("Check: A.x = " + bb.toString());
+//		RealVector bb = A.operate(x);
+//		IJ.log("Check: A.x = " + bb.toString());
 		return x;
+	}
+	
+	private Triangle chooseRandomTriangle(List<Triangle> triangles) {
+		int index = getRandomIndex(triangles.size() - 1);
+		Triangle t = triangles.get(index);
+		return t;
+	}
+	
+	private int getRandomIndex(int max) {
+		double randomDouble = Math.random();
+		randomDouble = randomDouble * max;
+		int randomIndex = (int) randomDouble;
+		return randomIndex;
+	}
+	
+	private Point[] reorderArray(Point[] points) {
+		Point firstPoint = points[0];
+		points[0] = points[1];
+		points[1] = points[2];
+		points[2] = firstPoint;		
+		return points;
 	}
 	
 	void showImage(ImageProcessor ip, String title) {
