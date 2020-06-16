@@ -60,10 +60,6 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 			return;
 		}
 		
-		if (!getUserInput()) {
-			return;
-		}
-		
 		ImageStack stack = im.getStack();
 		ImageProcessor ipStartImage = stack.getProcessor(1);
 		ImageProcessor ipEndImage = stack.getProcessor(2);
@@ -77,33 +73,31 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		List<Triangle> startTriangles = startTriangulation.getTriangles();
 		List<Triangle> endTriangles = endTriangulation.getTriangles();
 		
-		//TODO: find another way to run through triangles
-		//Choose 2 random triangles and find their transformation. Repeat a certain times
-		for (int k = 0; k < repeatCount; k++) {
-			Triangle startTriangle = chooseRandomTriangle(startTriangles);
-			Triangle  endTriangle = chooseRandomTriangle(endTriangles);
-			RealMatrix A = null;
-			
-			//test on one triangle
-			Point[] tempPoints1 = startTriangle.getPoints();
-			Point[] tempPoints2 = endTriangle.getPoints();
-			
-			for(int i = 0; i <3; i++) {
-				A = findAffineTransformation(tempPoints1, tempPoints2);
-				reorderArray(tempPoints2);
+		//Run
+		for(Triangle startTriangle : startTriangles) {
+			for(Triangle endTriangle : endTriangles) {
+				RealMatrix A = null;
 				
-				//Apply a to all points 
-				projectedPoints = applyAffineTransformation(startPoints, A);
+				Point[] tempPoints1 = startTriangle.getPoints();
+				Point[] tempPoints2 = endTriangle.getPoints();
 				
-				//Measure the distance of each projected point to its closest point
-				double residualError = calculateError(projectedPoints, endPoints);
-				
-				//If error is smallest then save currentPoints to correspondancePoints
-				if (Double.compare(finalError, residualError) > 0) {
-					finalError = residualError;
-					finalCorrespondance = currentCorrespondance;
-					finalTransformation = A;
-				}			
+				for(int i = 0; i <3; i++) {
+					A = findAffineTransformation(tempPoints1, tempPoints2);
+					reorderArray(tempPoints2);
+					
+					//Apply a to all points 
+					projectedPoints = applyAffineTransformation(startPoints, A);
+					
+					//Measure the distance of each projected point to its closest point
+					double residualError = calculateError(projectedPoints, endPoints);
+					
+					//If error is smallest then save currentPoints to correspondancePoints
+					if (Double.compare(finalError, residualError) > 0) {
+						finalError = residualError;
+						finalCorrespondance = currentCorrespondance;
+						finalTransformation = A;
+					}			
+				}
 			}
 		}
 		
@@ -111,12 +105,10 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		//TODO: find the least squares fit for the resulting point match
 		//FIXME: finalCorrespondance is wrong
 		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
-		IJ.log("Projected points: list = " + projectedPoints.toString());
-		//find transformation between realPoints and correspondancePoints
-		finalTransformation = findAffineTransformation(startPoints.toArray(new Point[0]), finalCorrespondance.toArray(new Point[0]));
-		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
-		IJ.log("Correspondance: list = " + finalCorrespondance.toString());
-		IJ.log("Correspondance: array = " + finalCorrespondance.toArray(new Point[0])[12].toString());
+//		IJ.log("Projected points: list = " + projectedPoints.toString());
+		//TODO: find transformation between realPoints and correspondancePoints
+//		finalTransformation = findAffineTransformation(startPoints.toArray(new Point[0]), finalCorrespondance.toArray(new Point[0]));
+//		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
 		
 //		showOverlay(ipStartImage, startTriangulation);
 //		showOverlay(ipEndImage, endTriangulation);
@@ -130,28 +122,17 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		showImage(cp, "colored dots");
 	}
 	
-	private boolean getUserInput() {
-		GenericDialog gd = new GenericDialog("Create Circle Test Image");
-		gd.addNumericField("Repeat Count", repeatCount, 0);
-		gd.showDialog();
-		if (gd.wasCanceled()) {
-			return false;
-		}
-		repeatCount = (int) gd.getNextNumber();
-		return true;
-	}
-	
 	private RealMatrix findAffineTransformation(Point[] startPoints, Point[] endPoints) {
 		RealMatrix M = createMatrix(startPoints);
 		RealVector b = createVector(endPoints);
-		IJ.log("Start: b = " + b.toString());
+//		IJ.log("Start: b = " + b.toString());
 		//solve for A
 		RealVector a = solveEquations(M, b);
-		IJ.log("Solution: a = " + a.toString());
+//		IJ.log("Solution: a = " + a.toString());
 		
 		// Verify that A.x = b:
 		RealVector bb = M.operate(a);
-		IJ.log("Check: A.x = " + bb.toString());
+//		IJ.log("Check: A.x = " + bb.toString());
 		
 		RealMatrix A = MatrixUtils.createRealMatrix(new double[][]
 				{{a.getEntry(0), a.getEntry(1), a.getEntry(2)},
@@ -197,10 +178,10 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 				}
 			}
 			error += calculateError(resultPoint, correspondancePoint);
-			IJ.log("Correspondance: " + resultPoint + " -> " + correspondancePoint);
+//			IJ.log("Correspondance: " + resultPoint + " -> " + correspondancePoint);
 			currentCorrespondance.add(correspondancePoint);
 		}
-		IJ.log("------------------------------------------");
+//		IJ.log("------------------------------------------");
 		return error;
 	}
 	
@@ -292,7 +273,6 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		return oly;
 	}
 	
-	//probably relevant for next exercise
 	private RealVector solveEquations(RealMatrix A, RealVector b) {
 		DecompositionSolver s = new SingularValueDecomposition(A).getSolver();
 //		IJ.log("Start: b = " + b.toString());
