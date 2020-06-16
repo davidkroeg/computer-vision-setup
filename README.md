@@ -1,4 +1,4 @@
-# IM520/MC5050 Computer Vision Project Setup
+# MC505 Term-Report
 
 ## How to install/use:
 
@@ -11,3 +11,6 @@ This project is set up for the [**Eclipse** Java IDE](https://www.eclipse.org/do
 See [this repo](https://github.com/imagingbook/imagej1-plugins-ide-setup) for alternative setups (IntelliJ and Netbeans).
 
 See [this repository](https://github.com/Digital-Media/HagenbergThesis) for a collection of other LaTeX templates.
+
+## Term-Report
+
