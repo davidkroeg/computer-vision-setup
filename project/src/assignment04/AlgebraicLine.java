@@ -12,6 +12,10 @@ public class AlgebraicLine {
 	//TODO: normalize Line during initialization
 	public AlgebraicLine(double a, double b, double c) {
 		//TODO: check that a and b are not 0 at the same time
+		if (a*a + b*b > 0) {
+			
+		}
+		
 		//TODO: incorporate test to see if parameters are admissible
 	}
 	
