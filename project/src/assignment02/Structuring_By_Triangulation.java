@@ -102,16 +102,12 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 		}
 		
 		IJ.log("Final Error: " + finalError);
-		//TODO: find the least squares fit for the resulting point match
-		//FIXME: finalCorrespondance is wrong
+		//apply the final transformation matrix to the first point set
 		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
-//		IJ.log("Projected points: list = " + projectedPoints.toString());
-		//TODO: find transformation between realPoints and correspondancePoints
-//		finalTransformation = findAffineTransformation(startPoints.toArray(new Point[0]), finalCorrespondance.toArray(new Point[0]));
-//		projectedPoints = applyAffineTransformation(startPoints, finalTransformation);
-		
-//		showOverlay(ipStartImage, startTriangulation);
-//		showOverlay(ipEndImage, endTriangulation);
+		IJ.log("Transformation Matrix: A = " + finalTransformation.toString());
+
+		showOverlay(ipStartImage, startTriangulation);
+		showOverlay(ipEndImage, endTriangulation);
 		
 		//draw result point list on second stack image
 		ImageProcessor cp = ipEndImage.convertToColorProcessor();
@@ -125,13 +121,12 @@ public class Structuring_By_Triangulation implements PlugInFilter {
 	private RealMatrix findAffineTransformation(Point[] startPoints, Point[] endPoints) {
 		RealMatrix M = createMatrix(startPoints);
 		RealVector b = createVector(endPoints);
-//		IJ.log("Start: b = " + b.toString());
+		
 		//solve for A
 		RealVector a = solveEquations(M, b);
-//		IJ.log("Solution: a = " + a.toString());
 		
 		// Verify that A.x = b:
-		RealVector bb = M.operate(a);
+//		RealVector bb = M.operate(a);
 //		IJ.log("Check: A.x = " + bb.toString());
 		
 		RealMatrix A = MatrixUtils.createRealMatrix(new double[][]

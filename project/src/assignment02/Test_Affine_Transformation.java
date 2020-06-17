@@ -89,7 +89,7 @@ public class Test_Affine_Transformation implements PlugInFilter {
 	}
 	
 	/**
-	 * Run through resulPoints and find each corresponding point in the realPoints which is closest. Calculate the least squares error.
+	 * Run through resulPoints and find each corresponding point in the realPoints which is closest. Calculate the least squared error.
 	 * @param resultPoints calculated points after the transformation
 	 * @param realPoints the real points of the right image
 	 * @return least squares error as a double

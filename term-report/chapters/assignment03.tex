@@ -1,0 +1,32 @@
+%%%----------------------------------------------------------
+\chapter{Iterative Closest-Point Algorithm}
+%%%----------------------------------------------------------
+
+This assignment took a step further and instead of trying to determine a point correspondence in a binary dot image the task was to find a reasonable correspondence between a pair of stereo pictures.
+The \textit{Harris Corner Detector}\cite{Harris2020} was used to detect corners in the images. Then a point correspondence between the corners in the left and the right image needed to be determined. Both pictures were taken from a slightly different viewpoint and the ambient conditions may differ so the amount of detected corners may differ. This results in the possibility that not all corners of one picture have a matching corner in the other picture, which causes the problem of outliers. 
+
+
+\section{Algorithm}
+
+Prepare images- part into two point clouds. (corner strength settings)
+
+\begin{enumerate}
+	\item Use Corner Detector
+	\item Initial Transformation
+	\item ICP - Affine Fitter -> Transformation Matrix
+	\item Find point pairs
+	\item Transform back then connect point pairs with lines
+\end{enumerate}
+
+\begin{algorithm}
+User Corner Detector
+
+Separate into two point clouds
+
+Get centroids of both point clouds
+
+Start ICP with vector connecting centroids as initial transformation
+
+
+
+\end{algorithm}
