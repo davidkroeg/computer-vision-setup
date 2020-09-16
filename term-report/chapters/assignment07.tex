@@ -1,5 +1,5 @@
 %%%----------------------------------------------------------
-\chapter{Texture Segmentation Using Laws Texture Filters}
+\chapter{Texture Segmentation Using Laws Texture Energy Filters}
 %%%----------------------------------------------------------
 
 In this assignment the task was to perform a texture-based segmentation based on \textit{Laws texture energy maps}\cite{Laws1980}. A manually selected texture patch is used as reference texture. Since the calculation of Laws texture energy maps was already provided as an imageJ plugin it is not described in this assignment. The plugin creates 9 texture energy maps which were used to generate a 9-dimensional feature vector for every pixel. 
@@ -36,7 +36,7 @@ After the distance map is created automatic Otsu thresholding was applied to the
 
 \subsection{Result}
 
-Figure \ref{fig:TestImage1}, \ref{fig:TestImage2} and \ref{fig:TestImage3} show the results of some text images. The results show the original image on the left then the distance map and the distance map after thresholding on the right. In most cases the segmentation worked quite well.
+Figure \ref{fig:TestImage1}, \ref{fig:TestImage2} and \ref{fig:TestImage3} show the results of some test images. The results show the original image on the left then the distance map and the distance map after thresholding on the right. In most cases the segmentation worked quite well.
 Overall the L2 distance norm showed better results. In some cases by quite a bit as shown in Figure \ref{fig:DistanceNorm}.
 
 \begin{figure}
@@ -110,5 +110,3 @@ Overall the L2 distance norm showed better results. In some cases by quite a bit
 	\caption{The floor was selected as reference texture. Image size: 307 x 410.}
 	\label{fig:TestImage3}
 \end{figure}
-%TODO go over text and check if complete
-
