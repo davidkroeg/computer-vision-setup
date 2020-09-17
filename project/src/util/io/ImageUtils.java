@@ -42,6 +42,22 @@ public class ImageUtils {
 		return pointList;
 	}
 	
+	public static List<java.awt.Point> collectPoints(ImagePlus ip){
+		List<java.awt.Point> pointList = new ArrayList<java.awt.Point>();
+
+		int w = ip.getWidth();
+		int h = ip.getHeight();
+
+		for(int y = 0; y < h; y++) {
+			for(int x = 0; x < w; x++) {
+				if(ip.getProcessor().getPixel(x, y) > 0) {
+					pointList.add(new java.awt.Point(x, y));
+				}
+			}
+		}
+		return pointList;
+	}
+	
 	public static java.awt.Point.Double calculateCentroid(List<java.awt.Point> points){
 		double sumX = 0;
 		double sumY = 0;
