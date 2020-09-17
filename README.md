@@ -1,16 +1,6 @@
 # MC505 Term-Report
 
-## How to install/use:
-
-* **Preferred:** First **fork** this repository on GitHub (account needed) and then **clone** to your computer.
-Regularly commit/push your work to your repository on GitHub. 
-* **Alternative:** Download as ZIP and work locally.
-
-
-This project is set up for the [**Eclipse** Java IDE](https://www.eclipse.org/downloads/). 
-See [this repo](https://github.com/imagingbook/imagej1-plugins-ide-setup) for alternative setups (IntelliJ and Netbeans).
-
-See [this repository](https://github.com/Digital-Media/HagenbergThesis) for a collection of other LaTeX templates.
-
-## Term-Report
+## Hand-In structure
+The term report is found in the highest hierarchy as pdf called term_report_kroeg.pdf.
+The used java files are in the repsective src folder from the eclipse project.
 
